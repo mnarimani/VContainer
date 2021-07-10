@@ -161,6 +161,9 @@ namespace VContainer.Unity
 
         public void Build()
         {
+            if (Container != null)
+                return;
+            
             if (Parent == null)
                 Parent = GetRuntimeParent();
 
@@ -183,6 +186,13 @@ namespace VContainer.Unity
 
             AutoInjectAll();
             AwakeWaitingChildren(this);
+        }
+
+        public void Rebuild()
+        {
+            Container.Dispose();
+            Container = null;
+            Build();
         }
 
         public LifetimeScope CreateChild(IInstaller installer = null)
