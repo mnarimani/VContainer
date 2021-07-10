@@ -223,19 +223,20 @@ namespace VContainer.Unity
 
         void InstallTo(IContainerBuilder builder)
         {
-            Configure(builder);
-
-            foreach (var installer in extraInstallers)
-            {
-                installer.Install(builder);
-            }
-
             ExtraInstaller extraInstallerStatic;
+            
             lock (SyncRoot)
             {
                 extraInstallerStatic = LifetimeScope.extraInstaller;
             }
             extraInstallerStatic?.Install(builder);
+            
+            foreach (var installer in extraInstallers)
+            {
+                installer.Install(builder);
+            }
+
+            Configure(builder);
 
             builder.RegisterInstance<LifetimeScope>(this).AsSelf();
         }
