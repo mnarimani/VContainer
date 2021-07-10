@@ -85,6 +85,12 @@ namespace VContainer.Unity
 
         static LifetimeScope Find(Type type)
         {
+            if (type == VContainerSettings.Instance.RootLifetimeScope.GetType())
+            {
+                var r = VContainerSettings.Instance.RootLifetimeScope;
+                r.Build();
+                return r;
+            }
             for (var i = 0; i < SceneManager.sceneCount; i++)
             {
                 var scene = SceneManager.GetSceneAt(i);
