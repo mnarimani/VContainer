@@ -85,23 +85,7 @@ namespace VContainer.Unity
 
         static LifetimeScope Find(Type type)
         {
-            if (type == VContainerSettings.Instance.RootLifetimeScope.GetType())
-            {
-                var r = VContainerSettings.Instance.RootLifetimeScope;
-                r.Build();
-                return r;
-            }
-            for (var i = 0; i < SceneManager.sceneCount; i++)
-            {
-                var scene = SceneManager.GetSceneAt(i);
-                if (scene.isLoaded)
-                {
-                    var result = Find(type, scene);
-                    if (result != null)
-                        return result;
-                }
-            }
-            return null;
+           return (LifetimeScope)FindObjectOfType(type);
         }
 
         static void EnqueueExtra(IInstaller installer)
@@ -136,7 +120,7 @@ namespace VContainer.Unity
                     Build();
                 }
             }
-            catch (VContainerParentTypeReferenceNotFound)
+            catch (VContainerParentTypeReferenceNotFound) when(!IsRoot)
             {
                 if (WaitingList.Contains(this))
                 {
@@ -157,6 +141,13 @@ namespace VContainer.Unity
         {
             DisposeCore();
             if (this != null) Destroy(gameObject);
+        }
+
+        public void DisposeCore()
+        {
+            Container?.Dispose();
+            Container = null;
+            CancelAwake(this);
         }
 
         public void Build()
@@ -282,9 +273,9 @@ namespace VContainer.Unity
                 return nextParent;
 
             // Find root from settings
-            if (VContainerSettings.Instance is VContainerSettings settings)
+            if (VContainerSettings.Instance != null)
             {
-                var rootLifetimeScope = settings.RootLifetimeScope;
+                var rootLifetimeScope = VContainerSettings.Instance.RootLifetimeScope;
                 if (rootLifetimeScope != null)
                 {
                     if (rootLifetimeScope.Container == null)
@@ -295,13 +286,6 @@ namespace VContainer.Unity
                 }
             }
             return null;
-        }
-
-        void DisposeCore()
-        {
-            Container?.Dispose();
-            Container = null;
-            CancelAwake(this);
         }
 
         void AutoInjectAll()
