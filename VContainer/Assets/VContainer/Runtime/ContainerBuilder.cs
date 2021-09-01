@@ -12,7 +12,10 @@ namespace VContainer
         object ApplicationOrigin { get; set; }
         T Register<T>(T registrationBuilder) where T : RegistrationBuilder;
         void RegisterBuildCallback(Action<IObjectResolver> container);
+        bool Exists<T>(bool includeInterfaceTypes = false);
         bool Exists(Type type, bool includeInterfaceTypes = false);
+        bool Remove<T>(bool includeInterfaceTypes = false);
+        bool Remove(Type type, bool includeInterfaceTypes = false);
     }
 
     public sealed class ScopedContainerBuilder : ContainerBuilder
@@ -42,7 +45,7 @@ namespace VContainer
     {
         public object ApplicationOrigin { get; set; }
 
-        readonly IList<RegistrationBuilder> registrationBuilders = new List<RegistrationBuilder>();
+        readonly List<RegistrationBuilder> registrationBuilders = new List<RegistrationBuilder>();
         List<Action<IObjectResolver>> buildCallbacks;
 
         public T Register<T>(T registrationBuilder) where T : RegistrationBuilder
@@ -50,7 +53,7 @@ namespace VContainer
             registrationBuilders.Add(registrationBuilder);
             return registrationBuilder;
         }
-
+        
         public void RegisterBuildCallback(Action<IObjectResolver> callback)
         {
             if (buildCallbacks == null)
@@ -58,17 +61,52 @@ namespace VContainer
             buildCallbacks.Add(callback);
         }
 
+        public bool Exists<T>(bool includeInterfaceTypes = false)
+        {
+            return Exists(typeof(T), includeInterfaceTypes);
+        }
+        
         public bool Exists(Type type, bool includeInterfaceTypes = false)
         {
             foreach (var registrationBuilder in registrationBuilders)
             {
                 if (registrationBuilder.ImplementationType == type ||
-                    includeInterfaceTypes && registrationBuilder.InterfaceTypes?.Contains(type) == true)
+                    (includeInterfaceTypes && registrationBuilder.InterfaceTypes?.Contains(type) == true))
                 {
                     return true;
                 }
             }
             return false;
+        }
+
+        public bool Remove<T>(bool includeInterfaceTypes = false)
+        {
+            return Remove(typeof(T), includeInterfaceTypes);
+        }
+        
+        public bool Remove(Type type, bool includeInterfaceTypes = false)
+        {
+            bool removedAnything = false;
+            
+            for (var i = registrationBuilders.Count - 1; i >= 0; i--)
+            {
+                var builder = registrationBuilders[i];
+                if (builder.ImplementationType == type)
+                {
+                    registrationBuilders.RemoveAt(i);
+                    removedAnything = true;
+                    
+                    if (includeInterfaceTypes == false)
+                        break;
+                }
+                else if (includeInterfaceTypes && builder.InterfaceTypes?.Contains(type) == true)
+                {
+                    registrationBuilders.RemoveAt(i);
+                    removedAnything = true;
+                }
+            }
+
+            return removedAnything;
         }
 
         public virtual IObjectResolver Build()
