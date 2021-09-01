@@ -25,7 +25,13 @@ namespace VContainer.Unity
 
         [SerializeField]
         bool autoRun = true;
+        
+        [SerializeField] 
+        private List<ScriptableObjectInstaller> _scriptableObjectInstallers;
 
+        [SerializeField] 
+        private List<MonoInstaller> _monoInstallers;
+        
         [SerializeField]
         protected List<GameObject> autoInjectGameObjects;
 
@@ -103,6 +109,9 @@ namespace VContainer.Unity
         {
             lock (SyncRoot) extraInstaller = null;
         }
+
+        protected List<ScriptableObjectInstaller> ScriptableObjectInstallers => _scriptableObjectInstallers;
+        protected List<MonoInstaller> MonoInstallers => _monoInstallers;
 
         public IObjectResolver Container { get; private set; }
         public LifetimeScope Parent { get; private set; }
@@ -230,19 +239,28 @@ namespace VContainer.Unity
 
         void InstallTo(IContainerBuilder builder)
         {
+            foreach (var installer in extraInstallers)
+            {
+                installer.Install(builder);
+            }
+
             ExtraInstaller extraInstallerStatic;
-            
             lock (SyncRoot)
             {
                 extraInstallerStatic = LifetimeScope.extraInstaller;
             }
             extraInstallerStatic?.Install(builder);
             
-            foreach (var installer in extraInstallers)
+            foreach (var installer in _scriptableObjectInstallers)
             {
                 installer.Install(builder);
             }
-
+            
+            foreach (var installer in _monoInstallers)
+            {
+                installer.Install(builder);
+            }
+            
             Configure(builder);
 
             builder.RegisterInstance<LifetimeScope>(this).AsSelf();
