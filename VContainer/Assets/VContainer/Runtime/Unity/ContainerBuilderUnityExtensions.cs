@@ -115,7 +115,7 @@ namespace VContainer.Unity
 
         public static RegistrationBuilder RegisterComponent<TInterface>(this IContainerBuilder builder, TInterface component)
         {
-            var registrationBuilder = new ComponentRegistrationBuilder(component).As(typeof(TInterface));
+            var registrationBuilder = new ComponentRegistrationBuilder(typeof(TInterface), component).As(typeof(TInterface));
             // Force inject execution
             builder.RegisterBuildCallback(container => container.Resolve<TInterface>());
             return builder.Register(registrationBuilder);

@@ -29,8 +29,8 @@ namespace VContainer.Unity
         ComponentDestination destination;
         Scene scene;
 
-        internal ComponentRegistrationBuilder(object instance)
-            : base(instance.GetType(), Lifetime.Singleton)
+        internal ComponentRegistrationBuilder(Type type, object instance)
+            : base(type, Lifetime.Singleton)
         {
             this.instance = instance;
         }
