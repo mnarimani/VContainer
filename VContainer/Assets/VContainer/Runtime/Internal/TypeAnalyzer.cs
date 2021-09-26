@@ -129,7 +129,7 @@ namespace VContainer.Internal
                 allowNoConstructor |= type.IsSubclassOf(typeof(UnityEngine.Component));
 #endif
                 if (!allowNoConstructor)
-                    throw new VContainerException(type, $"Type does not found injectable constructor, type: {type.Name}");
+                    throw new VContainerException(type, $"Type does not found injectable constructor, type: {type.FullName}");
             }
             // Methods, [Inject] Only
             var injectMethods = default(List<InjectMethodInfo>);
