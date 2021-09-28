@@ -29,9 +29,6 @@ namespace VContainer.Unity
         [SerializeField] 
         private List<ScriptableObjectInstaller> _scriptableObjectInstallers;
 
-        [SerializeField] 
-        private List<MonoInstaller> _monoInstallers;
-        
         [SerializeField]
         protected List<GameObject> autoInjectGameObjects;
 
@@ -111,7 +108,6 @@ namespace VContainer.Unity
         }
 
         protected List<ScriptableObjectInstaller> ScriptableObjectInstallers => _scriptableObjectInstallers;
-        protected List<MonoInstaller> MonoInstallers => _monoInstallers;
 
         public IObjectResolver Container { get; private set; }
         public LifetimeScope Parent { get; private set; }
@@ -256,7 +252,7 @@ namespace VContainer.Unity
                 installer.Install(builder);
             }
             
-            foreach (var installer in _monoInstallers)
+            foreach (var installer in GetComponents<IInstaller>())
             {
                 installer.Install(builder);
             }
