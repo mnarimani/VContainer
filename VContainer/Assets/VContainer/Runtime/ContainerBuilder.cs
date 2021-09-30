@@ -16,6 +16,7 @@ namespace VContainer
         bool Exists(Type type, bool includeInterfaceTypes = false);
         bool Remove<T>(bool includeInterfaceTypes = false);
         bool Remove(Type type, bool includeInterfaceTypes = false);
+        RegistrationBuilder GetRegistration<T>(bool includeInterfaceTypes = false);
     }
 
     public sealed class ScopedContainerBuilder : ContainerBuilder
@@ -107,6 +108,21 @@ namespace VContainer
             }
 
             return removedAnything;
+        }
+
+        public RegistrationBuilder GetRegistration<T>(bool includeInterfaceTypes = false)
+        {
+            var type = typeof(T);
+            foreach (var registrationBuilder in registrationBuilders)
+            {
+                if (registrationBuilder.ImplementationType == type ||
+                    (includeInterfaceTypes && registrationBuilder.InterfaceTypes?.Contains(type) == true))
+                {
+                    return registrationBuilder;
+                }
+            }
+            
+            return null;
         }
 
         public virtual IObjectResolver Build()
