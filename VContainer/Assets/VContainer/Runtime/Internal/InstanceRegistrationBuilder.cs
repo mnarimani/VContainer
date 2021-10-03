@@ -1,11 +1,13 @@
+using System;
+
 namespace VContainer.Internal
 {
     sealed class InstanceRegistrationBuilder : RegistrationBuilder
     {
         readonly object implementationInstance;
 
-        public InstanceRegistrationBuilder(object implementationInstance)
-            : base(implementationInstance.GetType(), Lifetime.Singleton)
+        public InstanceRegistrationBuilder(Type type, object implementationInstance)
+            : base(type, Lifetime.Singleton)
         {
             this.implementationInstance = implementationInstance;
         }
