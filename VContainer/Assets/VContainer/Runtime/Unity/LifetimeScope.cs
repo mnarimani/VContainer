@@ -216,7 +216,9 @@ namespace VContainer.Unity
             {
                 prefab.gameObject.SetActive(false);
             }
-            var child = Instantiate(prefab, transform, false);
+
+            Transform parent = transform.gameObject.scene.name == null ? null : transform;
+            var child = Instantiate(prefab, parent, false);
             if (installer != null)
             {
                 child.extraInstallers.Add(installer);
