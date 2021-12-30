@@ -25,8 +25,8 @@ namespace VContainer.Unity
 
         [SerializeField]
         bool autoRun = true;
-        
-        [SerializeField] 
+
+        [SerializeField]
         private List<ScriptableObjectInstaller> _scriptableObjectInstallers;
 
         [SerializeField]
@@ -88,7 +88,7 @@ namespace VContainer.Unity
 
         static LifetimeScope Find(Type type)
         {
-           return (LifetimeScope)FindObjectOfType(type);
+            return (LifetimeScope) FindObjectOfType(type);
         }
 
         static void EnqueueExtra(IInstaller installer)
@@ -98,7 +98,7 @@ namespace VContainer.Unity
                 if (extraInstaller != null)
                     extraInstaller.Add(installer);
                 else
-                    extraInstaller = new ExtraInstaller { installer };
+                    extraInstaller = new ExtraInstaller {installer};
             }
         }
 
@@ -125,7 +125,7 @@ namespace VContainer.Unity
                     Build();
                 }
             }
-            catch (VContainerParentTypeReferenceNotFound) when(!IsRoot)
+            catch (VContainerParentTypeReferenceNotFound) when (!IsRoot)
             {
                 if (WaitingList.Contains(this))
                 {
@@ -140,7 +140,7 @@ namespace VContainer.Unity
             DisposeCore();
         }
 
-        protected virtual void Configure(IContainerBuilder builder) { }
+        protected virtual void Configure(IContainerBuilder builder) {}
 
         public void Dispose()
         {
@@ -159,7 +159,7 @@ namespace VContainer.Unity
         {
             if (Container != null)
                 return;
-            
+
             if (Parent == null)
                 Parent = GetRuntimeParent();
 
@@ -173,7 +173,7 @@ namespace VContainer.Unity
             }
             else
             {
-                var builder = new ContainerBuilder { ApplicationOrigin = this };
+                var builder = new ContainerBuilder {ApplicationOrigin = this};
                 InstallTo(builder);
                 Container = builder.Build();
             }
@@ -211,13 +211,14 @@ namespace VContainer.Unity
 
         public LifetimeScope CreateChildFromPrefab(LifetimeScope prefab, IInstaller installer = null)
         {
+            Transform parent = transform.gameObject.scene.name == null ? null : transform;
+
             var wasActive = prefab.gameObject.activeSelf;
-            if (wasActive)
+            if (wasActive && parent != null)
             {
                 prefab.gameObject.SetActive(false);
             }
 
-            Transform parent = transform.gameObject.scene.name == null ? null : transform;
             var child = Instantiate(prefab, parent, false);
             if (installer != null)
             {
@@ -226,7 +227,8 @@ namespace VContainer.Unity
             child.parentReference.Object = this;
             if (wasActive)
             {
-                prefab.gameObject.SetActive(true);
+                if (parent != null)
+                    prefab.gameObject.SetActive(true);
                 child.gameObject.SetActive(true);
             }
             return child;
@@ -248,17 +250,17 @@ namespace VContainer.Unity
                 extraInstallerStatic = LifetimeScope.extraInstaller;
             }
             extraInstallerStatic?.Install(builder);
-            
+
             foreach (var installer in _scriptableObjectInstallers)
             {
                 installer.Install(builder);
             }
-            
+
             foreach (var installer in GetComponents<IInstaller>())
             {
                 installer.Install(builder);
             }
-            
+
             Configure(builder);
 
             builder.RegisterInstance<LifetimeScope>(this).AsSelf();
